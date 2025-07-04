@@ -28,7 +28,7 @@ import {
         <Sidebar variant="push" >
             <SidebarHeader style={{backgroundColor:"#212A3E",color:"white"}} className="text-white"></SidebarHeader>
           <SidebarContent  style={{backgroundColor:"#212A3E",color:"white"}} className="text-white">
-            <div src={logo} className="flex"><img style={{height:"50px",width:"auto"}} />
+            <div className="flex"><img src={logo} style={{height:"50px",width:"auto"}} />
              <h2 className="text-2xl font-bold mb-4">Track Wise</h2>
              </div>
             <SidebarGroup>
