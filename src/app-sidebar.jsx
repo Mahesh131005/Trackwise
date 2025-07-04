@@ -1,5 +1,6 @@
 import React,{Component} from "react"
 import { useNavigate } from "react-router-dom";
+import logo from './assets/Print_Transparent.svg';
 
 import {
   SidebarProvider,
@@ -27,7 +28,7 @@ import {
         <Sidebar variant="push" >
             <SidebarHeader style={{backgroundColor:"#212A3E",color:"white"}} className="text-white"></SidebarHeader>
           <SidebarContent  style={{backgroundColor:"#212A3E",color:"white"}} className="text-white">
-            <div className="flex"><img style={{height:"50px",width:"auto"}} src="./assets/Print_Transparent.svg"/>
+            <div src={logo} className="flex"><img style={{height:"50px",width:"auto"}} />
              <h2 className="text-2xl font-bold mb-4">Track Wise</h2>
              </div>
             <SidebarGroup>
