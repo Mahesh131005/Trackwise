@@ -97,30 +97,28 @@ function Home() {
     }
   };
 
-  const onDelete = async (idx) => {
-    const entry = entries[idx];
-    if (!entry || !entry.id) {
-    console.error("❌ Invalid entry or missing ID:", entry);
-    alert("Could not find the selected expense to delete.");
-    return;
-  }
-    console.log("Deleting entry at index:", idx, entries[idx]);
-    try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/expenses/${entry.id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+  const onDelete = async (id) => {
+  try {
+    await axios.delete(`${import.meta.env.VITE_API_URL}/expenses/${id}`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    });
 
-      const amountToRemove = parseInt(entries[idx].amount);
-      if (!isNaN(amountToRemove)) {
-        setTotalAmt((prev) => prev - amountToRemove);
-      }
-      setEntries((prevEntries) => prevEntries.filter((_, i) => i !== idx));
-    } catch (err) {
-      alert("Failed to delete expense");
+    const deletedEntry = entries.find((entry) => entry.id === id);
+    const amountToRemove = parseInt(deletedEntry?.amount);
+
+    if (!isNaN(amountToRemove)) {
+      setTotalAmt((prev) => prev - amountToRemove);
     }
-  };
+
+    setEntries((prevEntries) => prevEntries.filter((entry) => entry.id !== id));
+  } catch (err) {
+    console.error("❌ Delete failed:", err);
+    alert("Failed to delete expense");
+  }
+};
+
 
   const onClear = () => {
     setTotalAmt(0);
