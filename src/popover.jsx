@@ -6,37 +6,54 @@ import {
 import React,{useState} from 'react';
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-function Popover1({ addEntry,onClear }) {
-  const [formData, setFormData] = useState({
-    name: "",
-    time: "",
-    desc: "",
-    category: "",
-    amount: "",
-  });
+//import { useNavigate} from "react-router-dom";
 
+function Popover1({ addEntry,onClear,totalamt }) {
+  const now = new Date();
+const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+const [formData, setFormData] = useState({
+  name: "",
+  created_at: currentMonth, 
+  desc: "",
+  category: "",
+  amount: ""
+});
+const placeholders = {
+  name: "e.g. Grocery",
+  created_at: "e.g. 2025-07",
+  desc: "e.g. Bought vegetables",
+  category: "e.g. Food,EMI",
+  amount: "e.g. 1500"
+};
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
-
   const handleAdd = () => {
     const newEntry = {
-      name: formData.name,
-      time: formData.time,
+      title: formData.name,
+      created_at: formData.created_at,
       description: formData.desc,
       category: formData.category,
       amount: formData.amount,
     };
     addEntry(newEntry);
-    // Optional: clear form
-    setFormData({ name: "", time: "", desc: "", category: "", amount: "" });
+    totalamt(formData.amount);
+  
+   setFormData({
+    name: "",
+    created_at: currentMonth,
+    desc: "",
+    category: "",
+    amount: ""
+  });
   };
+  
 
   return (
     <div>
     <Popover>
-      <div className="flex flex-row"><PopoverTrigger asChild>
+      <div className="flex flex-row space-y-4"><PopoverTrigger asChild>
         <button type="button" className="w-35 btn btn-primary">
           Add
         </button>
@@ -47,8 +64,8 @@ function Popover1({ addEntry,onClear }) {
           <h4 className="font-medium">Enter the Details</h4>
           <div className="grid gap-2">
             {[
-              ["name", "Name"],
-              ["time", "Time"],
+              ["name", "Title"],
+              ["created_at", "YYYY-MM"],
               ["desc", "Description"],
               ["category", "Category"],
               ["amount", "Amount"],
@@ -60,6 +77,7 @@ function Popover1({ addEntry,onClear }) {
                   value={formData[id]}
                   onChange={handleChange}
                   className="col-span-2 h-8"
+                  placeholder={placeholders[id]}
                 />
               </div>
             ))}
