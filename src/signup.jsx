@@ -10,6 +10,7 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const [name, setName] = useState("");
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -18,8 +19,10 @@ function Signup() {
       alert("Signup successful. Please login.");
       navigate("/");
     } catch (err) {
-      alert("Signup failed: " + err.response?.data || "Server error");
-    }
+  const msg = err.response?.data?.message || "Server error";
+  alert("Signup failed: " + msg);
+}
+
   };
 
   return (
