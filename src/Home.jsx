@@ -66,7 +66,7 @@ function Home() {
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/expenses", {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/expenses`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
@@ -82,7 +82,7 @@ function Home() {
 
   const addEntry = async (entry) => {
     try {
-      await axios.post("http://localhost:4000/expenses", entry, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/expenses`, entry, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
@@ -100,7 +100,7 @@ function Home() {
   const onDelete = async (idx) => {
     const entryId = entries[idx].id;
     try {
-      await axios.delete(`http://localhost:4000/expenses/${entryId}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/expenses/${entryId}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
