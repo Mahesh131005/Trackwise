@@ -60,7 +60,7 @@ const downloadPDF = async () => {
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/expenses", {
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/expenses`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         });
         setExpenses(res.data);
