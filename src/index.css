@@ -18,6 +18,21 @@
     background-color: #F1FDF3;
     --sidebar-ring: oklch(0.708 0 0);
   }
+/* :root {
+  --tw-bg-opacity: 1 !important;
+  --tw-text-opacity: 1 !important;
+  --tw-shadow-color: rgba(0, 0, 0, 0.1) !important;
+  --tw-ring-color: #000 !important;
+  --tw-ring-offset-shadow: 0 !important;
+  --tw-shadow: none !important;
+  --tw-text-color: #000 !important;
+  --tw-bg-color: #fff !important;
+}
+
+* {
+  color: #000 !important;
+  background-color: #fff !important;
+} */
 
   .dark {
     --sidebar: oklch(0.205 0 0);

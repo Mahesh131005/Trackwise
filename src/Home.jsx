@@ -87,6 +87,7 @@ function Home() {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
       });
+      console.log(entry);
       console.log("Token:", localStorage.getItem("token"));
       setEntries((prev) => [...prev, entry]);
       totalamt(entry.amount);

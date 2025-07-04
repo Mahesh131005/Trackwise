@@ -1,13 +1,12 @@
-// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}"
   ],
+  darkMode: false, // ✅ fully disables dark mode + oklch usage
   theme: {
-    extend: {},
+    extend: {}
   },
   plugins: [],
-  darkMode: "media", // or 'class' for manual toggle
 };

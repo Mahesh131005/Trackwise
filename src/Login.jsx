@@ -13,8 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
-
+ import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -45,6 +44,7 @@ function Login() {
 
   const handleGoogleSuccess = async (credentialResponse) => {
     const token = credentialResponse.credential;
+      console.log("🔑 Google credential:", token);
     try {
       const res = await axios.post("http://localhost:4000/auth/google-login", {
         token,
@@ -108,17 +108,13 @@ function Login() {
             <Button type="submit" className="w-full">
               Login
             </Button>
-            {/* ✅ Display Google login directly */}
-            <GoogleLogin
-              onSuccess={handleGoogleSuccess}
-              onError={() => alert("Google login failed")}
-              ux_mode="popup"
-              theme="filled_black"
-              text="continue_with"
-              type="standard"
-              size="large"
-              shape="pill"
-            />
+  <GoogleLogin
+    onSuccess={credentialResponse => handleGoogleSuccess(credentialResponse)}
+    onError={() => console.log("Login Failed")}
+    shape="pill"
+    theme="filled_black"
+  />
+
           </CardFooter>
         </form>
       </Card>
