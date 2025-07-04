@@ -98,9 +98,15 @@ function Home() {
   };
 
   const onDelete = async (idx) => {
-    const entryId = entries[idx].id;
+    const entry = entries[idx];
+    if (!entry || !entry.id) {
+    console.error("❌ Invalid entry or missing ID:", entry);
+    alert("Could not find the selected expense to delete.");
+    return;
+  }
+    console.log("Deleting entry at index:", idx, entries[idx]);
     try {
-      await axios.delete(`${import.meta.env.VITE_API_URL}/expenses/${entryId}`, {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/expenses/${entry.id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
