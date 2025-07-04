@@ -14,7 +14,7 @@ function Signup() {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:4000/auth/signup", { email, password });
+      await axios.post(`${import.meta.env.VITE_API_URL}/auth/signup`, { email, password });
       alert("Signup successful. Please login.");
       navigate("/");
     } catch (err) {
