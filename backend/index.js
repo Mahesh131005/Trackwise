@@ -8,7 +8,7 @@ app.use(express.json());
 
 // Routes
 app.use(cors({
-  origin: ["http://localhost:5173", "https://your-frontend.vercel.app"],
+  origin: ["http://localhost:5173", "https://trackwise-2tukhdmyg-k-gowri-maheshs-projects.vercel.app"],
   credentials: true,
 }));
 app.use("/auth", require("./routes/auth"));
