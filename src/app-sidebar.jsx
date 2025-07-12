@@ -53,7 +53,7 @@ import {
           </SidebarContent>
         </Sidebar>
 <main>
-        <SidebarTrigger className="bg-blue-600 text-white rounded-md p-2 hover:bg-blue-700"/>
+        <SidebarTrigger className="bg-blue-600 text-grey rounded-md p-2 hover:bg-blue-700"/>
       </main>
         {/* <SidebarInset className="p-6" style={{backgroundColor:"F1FDF3"}}>
           {/* <h1 className="text-4xl font-bold text-black">Track Wise</h1> \
