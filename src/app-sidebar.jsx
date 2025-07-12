@@ -34,18 +34,18 @@ import {
             <SidebarGroup>
             <SidebarMenu  className="list-none p-0">
               <SidebarMenuItem>
-                <SidebarMenuButton style={{backgroundColor:"FFD66B",color:"white"}}
+                <SidebarMenuButton style={{backgroundColor:"FFD66B",color:"grey"}}
               onClick={()=>navigate("/home")}
                >Home</SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton style={{backgroundColor:"FFD66B",color:"white"}} onClick={()=>navigate("/reports")}>Expenses Report</SidebarMenuButton>
+                <SidebarMenuButton style={{backgroundColor:"FFD66B",color:"grey"}} onClick={()=>navigate("/reports")}>Expenses Report</SidebarMenuButton>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <SidebarMenuButton style={{backgroundColor:"FFD66B",color:"white"}} onClick={() => alert("Contact us at: mahesh131005@gmail.com")}>Contact Us</SidebarMenuButton>
+                <SidebarMenuButton style={{backgroundColor:"FFD66B",color:"grey"}} onClick={() => alert("Contact us at: mahesh131005@gmail.com")}>Contact Us</SidebarMenuButton>
               </SidebarMenuItem>
                <SidebarMenuItem>
-                <SidebarMenuButton style={{backgroundColor:"FFD66B",color:"white"}} onClick={()=>handleLogout()}>Logout</SidebarMenuButton>
+                <SidebarMenuButton style={{backgroundColor:"FFD66B",color:"grey"}} onClick={()=>handleLogout()}>Logout</SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
             </SidebarGroup>
