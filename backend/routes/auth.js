@@ -36,7 +36,16 @@ router.post("/signup", async (req, res) => {
     .from("users")
     .insert([{ email, password: hashed }]);
 
-  if (error) return res.status(400).json({ message: "Signup failed" });
+  if (error) {
+    // If it's a duplicate email error → send a cleaner message
+    if (error.message.includes("duplicate key")) {
+      return res.status(400).json({ message: "Email already exists" });
+    }
+
+    // Otherwise send the actual error
+    return res.status(400).json({ message: error.message });
+  }
+
   res.status(201).json({ message: "Signup successful" });
 });
 
