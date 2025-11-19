@@ -13,6 +13,11 @@ app.use(cors({
 }));
 app.use("/auth", require("./routes/auth"));
 app.use("/expenses", require("./routes/expenses"));
+app.use("/budgets", require("./routes/budgets"));
+app.use("/recurring", require("./routes/recurring"));
+
+const { startScheduler } = require("./scheduler");
+startScheduler();
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
