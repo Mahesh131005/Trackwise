@@ -1,18 +1,21 @@
 const express = require("express");
 const router = express.Router();
 const supabase = require("../db");
+const authenticate = require("../middleware/authenticate");
+
+// Apply middleware to all routes
+router.use(authenticate);
 
 // Get all budgets for a user
 router.get("/", async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-        const { data: user, error: authError } = await supabase.auth.getUser(token);
-        if (authError || !user) return res.status(401).json({ error: "Unauthorized" });
-
         const { month } = req.query;
-        let query = supabase.from("budgets").select("*").eq("user_id", user.user.id);
+
+        // Use req.user.userId from the validated token
+        let query = supabase
+            .from("budgets")
+            .select("*")
+            .eq("user_id", req.user.userId);
 
         if (month) {
             query = query.eq("month", month);
@@ -30,20 +33,14 @@ router.get("/", async (req, res) => {
 // Set or Update a budget
 router.post("/", async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-        const { data: user, error: authError } = await supabase.auth.getUser(token);
-        if (authError || !user) return res.status(401).json({ error: "Unauthorized" });
-
         const { category, amount, month } = req.body;
 
-        // Upsert budget (Insert or Update if exists)
+        // Upsert budget using req.user.userId
         const { data, error } = await supabase
             .from("budgets")
             .upsert(
                 {
-                    user_id: user.user.id,
+                    user_id: req.user.userId,
                     category,
                     amount,
                     month,

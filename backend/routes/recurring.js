@@ -1,20 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const supabase = require("../db");
+const authenticate = require("../middleware/authenticate");
+
+// Apply middleware to all routes
+router.use(authenticate);
 
 // Get all recurring expenses
 router.get("/", async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-        const { data: user, error: authError } = await supabase.auth.getUser(token);
-        if (authError || !user) return res.status(401).json({ error: "Unauthorized" });
-
         const { data, error } = await supabase
             .from("recurring_expenses")
             .select("*")
-            .eq("user_id", user.user.id);
+            .eq("user_id", req.user.userId);
 
         if (error) throw error;
         res.json(data);
@@ -26,19 +24,13 @@ router.get("/", async (req, res) => {
 // Add a recurring expense
 router.post("/", async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-        const { data: user, error: authError } = await supabase.auth.getUser(token);
-        if (authError || !user) return res.status(401).json({ error: "Unauthorized" });
-
         const { category, amount, description, frequency, next_due_date } = req.body;
 
         const { data, error } = await supabase
             .from("recurring_expenses")
             .insert([
                 {
-                    user_id: user.user.id,
+                    user_id: req.user.userId,
                     category,
                     amount,
                     description,
@@ -58,18 +50,13 @@ router.post("/", async (req, res) => {
 // Delete a recurring expense
 router.delete("/:id", async (req, res) => {
     try {
-        const token = req.headers.authorization?.split(" ")[1];
-        if (!token) return res.status(401).json({ error: "Unauthorized" });
-
-        const { data: user, error: authError } = await supabase.auth.getUser(token);
-        if (authError || !user) return res.status(401).json({ error: "Unauthorized" });
-
         const { id } = req.params;
+
         const { error } = await supabase
             .from("recurring_expenses")
             .delete()
             .eq("id", id)
-            .eq("user_id", user.user.id);
+            .eq("user_id", req.user.userId);
 
         if (error) throw error;
         res.json({ message: "Recurring expense deleted" });
