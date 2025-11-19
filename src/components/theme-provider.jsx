@@ -2,7 +2,8 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 
 const ThemeContext = createContext();
 
-export function ThemeProvider({ children, defaultTheme = "system", storageKey = "vite-ui-theme" }) {
+// FIX: Added "...props" to the function arguments below
+export function ThemeProvider({ children, defaultTheme = "system", storageKey = "vite-ui-theme", ...props }) {
     const [theme, setTheme] = useState(() => {
         return localStorage.getItem(storageKey) || defaultTheme;
     });
@@ -31,6 +32,7 @@ export function ThemeProvider({ children, defaultTheme = "system", storageKey = 
     };
 
     return (
+        // Now "props" is defined and can be safely spread here
         <ThemeContext.Provider value={value} {...props}>
             {children}
         </ThemeContext.Provider>
