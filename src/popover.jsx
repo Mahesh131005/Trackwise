@@ -3,28 +3,28 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover"
-import React,{useState} from 'react';
+import React, { useState } from 'react';
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-//import { useNavigate} from "react-router-dom";
+import { Button } from "@/components/ui/button"
 
-function Popover1({ addEntry,onClear,totalamt }) {
+function Popover1({ addEntry, onClear, totalamt }) {
   const now = new Date();
-const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-const [formData, setFormData] = useState({
-  name: "",
-  created_at: currentMonth, 
-  desc: "",
-  category: "",
-  amount: ""
-});
-const placeholders = {
-  name: "e.g. Grocery",
-  created_at: "e.g. 2025-07",
-  desc: "e.g. Bought vegetables",
-  category: "e.g. Food,EMI",
-  amount: "e.g. 1500"
-};
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const [formData, setFormData] = useState({
+    name: "",
+    created_at: currentMonth,
+    desc: "",
+    category: "",
+    amount: ""
+  });
+  const placeholders = {
+    name: "e.g. Grocery",
+    created_at: "e.g. 2025-07",
+    desc: "e.g. Bought vegetables",
+    category: "e.g. Food,EMI",
+    amount: "e.g. 1500"
+  };
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData((prev) => ({ ...prev, [id]: value }));
@@ -39,39 +39,45 @@ const placeholders = {
     };
     addEntry(newEntry);
     totalamt(formData.amount);
-  
-   setFormData({
-    name: "",
-    created_at: currentMonth,
-    desc: "",
-    category: "",
-    amount: ""
-  });
+
+    setFormData({
+      name: "",
+      created_at: currentMonth,
+      desc: "",
+      category: "",
+      amount: ""
+    });
   };
-  
 
   return (
-    <div>
     <Popover>
-      <div className="flex flex-row space-y-4"><PopoverTrigger asChild>
-        <button type="button" className="w-35 btn btn-primary">
-          Add
-        </button>
-      </PopoverTrigger>
-      <button type="button" onClick={()=>onClear()}className="btn w-35 btn-danger">Clear</button></div>
+      {/* FIX: Flex container ensures buttons fit the width properly */}
+      <div className="flex flex-row gap-2 w-full">
+        <PopoverTrigger asChild>
+          <Button className="flex-1">Add Expense</Button>
+        </PopoverTrigger>
+        <Button
+          variant="destructive"
+          onClick={() => onClear()}
+          className="flex-1"
+        >
+          Clear
+        </Button>
+      </div>
+
       <PopoverContent className="w-80">
         <div className="grid gap-4">
-          <h4 className="font-medium">Enter the Details</h4>
+          <h4 className="font-medium leading-none">New Expense</h4>
           <div className="grid gap-2">
             {[
               ["name", "Title"],
-              ["created_at", "YYYY-MM"],
+              ["created_at", "Date (YYYY-MM)"],
               ["desc", "Description"],
               ["category", "Category"],
               ["amount", "Amount"],
             ].map(([id, label]) => (
               <div key={id} className="grid grid-cols-3 items-center gap-4">
-                <Label htmlFor={id}>{label}</Label>
+                <Label htmlFor={id} className="text-right">{label}</Label>
                 <Input
                   id={id}
                   value={formData[id]}
@@ -82,13 +88,12 @@ const placeholders = {
               </div>
             ))}
           </div>
-          <button onClick={handleAdd} className="btn btn-success">
-            Enter
-          </button>
+          <Button onClick={handleAdd} className="w-full">
+            Save Entry
+          </Button>
         </div>
       </PopoverContent>
     </Popover>
-    </div>
   );
 }
-export {Popover1};
+export { Popover1 };

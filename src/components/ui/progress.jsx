@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 function Progress({
   className,
   value,
+  indicatorColor, // 1. We extract this prop here so it is NOT passed to ...props
   ...props
 }) {
   return (
@@ -18,7 +19,8 @@ function Progress({
       {...props}>
       <ProgressPrimitive.Indicator
         data-slot="progress-indicator"
-        className={cn("h-full w-full flex-1 transition-all", props.indicatorColor || "bg-primary")}
+        // 2. We use it here for styling
+        className={cn("h-full w-full flex-1 transition-all", indicatorColor || "bg-primary")}
         style={{ transform: `translateX(-${100 - (value || 0)}%)` }} />
     </ProgressPrimitive.Root>
   );

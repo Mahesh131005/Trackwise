@@ -1,7 +1,4 @@
-// Home.jsx
 import React, { useState, useEffect } from "react";
-import { AppSidebar } from "./app-sidebar.jsx";
-import Tables from "./tables.jsx";
 import { Popover1 } from "./popover.jsx";
 import { Button } from "./components/ui/button.jsx";
 import { DropdownMenuCheckboxes } from "./components/dropd.jsx";
@@ -10,8 +7,21 @@ import { getSavingsTipsFromGemini } from "./lib/gemini.js";
 import { BudgetCard } from "./components/BudgetCard";
 import { AddBudgetModal } from "./components/AddBudgetModal";
 import jsPDF from "jspdf";
+import Tables from "./tables";
 import "jspdf-autotable";
-import { Download, Upload, FileText } from "lucide-react";
+import {
+  Download,
+  Upload,
+  FileText,
+  Wallet,
+  Trash2,
+  TrendingUp,
+  TrendingDown,
+  Lightbulb,
+  CreditCard
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function Home() {
   const [savingsTips, setSavingsTips] = useState("");
@@ -22,22 +32,21 @@ function Home() {
   const [entries, setEntries] = useState([]);
   const [budgets, setBudgets] = useState([]);
   const [sortOrder, setSortOrder] = useState("asc");
+  const [loading, setLoading] = useState(true);
 
+  // --- Helper Functions ---
   const getMonthLabel = (monthStr) => {
     if (!monthStr || typeof monthStr !== "string") return "unknown";
     const [year, month] = monthStr.split("-").map(Number);
     if (!year || !month) return "unknown";
-
     const now = new Date();
     const thisMonth = now.getMonth() + 1;
     const thisYear = now.getFullYear();
     const lastMonth = thisMonth === 1 ? 12 : thisMonth - 1;
     const lastMonthYear = thisMonth === 1 ? thisYear - 1 : thisYear;
-
     if (year === thisYear && month === thisMonth) return "thismonth";
     if (year === lastMonthYear && month === lastMonth) return "lastmonth";
     if (year < lastMonthYear || (year === lastMonthYear && month < lastMonth)) return "older";
-
     return "unknown";
   };
 
@@ -58,27 +67,25 @@ function Home() {
     return sortOrder === "asc" ? aAmt - bAmt : bAmt - aAmt;
   });
 
-  const toggleSort = () => {
-    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-  };
+  const toggleSort = () => setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
 
   const totalamt = (amt) => {
     const parsed = parseInt(amt);
-    if (!isNaN(parsed)) {
-      setTotalAmt((prev) => prev + parsed);
-    }
+    if (!isNaN(parsed)) setTotalAmt((prev) => prev + parsed);
   };
 
+  // --- Data Fetching ---
   const fetchExpenses = async () => {
+    setLoading(true);
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/expenses`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setEntries(res.data);
     } catch (err) {
       console.error("Error fetching expenses:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -86,9 +93,7 @@ function Home() {
     try {
       const month = new Date().toISOString().slice(0, 7);
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/budgets?month=${month}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setBudgets(res.data);
     } catch (err) {
@@ -101,18 +106,17 @@ function Home() {
     fetchBudgets();
   }, []);
 
+  // --- Handlers ---
   const addEntry = async (entry) => {
     try {
       await axios.post(`${import.meta.env.VITE_API_URL}/expenses`, entry, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
       setEntries((prev) => [...prev, entry]);
       totalamt(entry.amount);
-      fetchExpenses(); // Refresh to update budget progress if needed
+      fetchExpenses();
     } catch (err) {
-      console.error("Add expense failed:", err.response?.data || err.message);
+      console.error("Add expense failed:", err);
       alert("Failed to add expense");
     }
   };
@@ -120,18 +124,11 @@ function Home() {
   const onDelete = async (id) => {
     try {
       await axios.delete(`${import.meta.env.VITE_API_URL}/expenses/${id}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-
       const deletedEntry = entries.find((entry) => entry.id === id);
       const amountToRemove = parseInt(deletedEntry?.amount);
-
-      if (!isNaN(amountToRemove)) {
-        setTotalAmt((prev) => prev - amountToRemove);
-      }
-
+      if (!isNaN(amountToRemove)) setTotalAmt((prev) => prev - amountToRemove);
       setEntries((prevEntries) => prevEntries.filter((entry) => entry.id !== id));
     } catch (err) {
       console.error("❌ Delete failed:", err);
@@ -148,10 +145,8 @@ function Home() {
     setIsGenerating(true);
     setSavingsTips("");
     setShowTipsBox(true);
-
     const tips = await getSavingsTipsFromGemini(entries);
     let index = 0;
-
     const typingInterval = setInterval(() => {
       setSavingsTips((prev) => prev + tips.charAt(index));
       index++;
@@ -163,12 +158,10 @@ function Home() {
   };
 
   const handleExportCSV = () => {
-    const csvContent = "data:text/csv;charset=utf-8,"
-      + "Category,Amount,Description,Date\n"
+    const csvContent = "data:text/csv;charset=utf-8,Category,Amount,Description,Date\n"
       + entries.map(e => `${e.category},${e.amount},${e.description},${e.created_at}`).join("\n");
-    const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.setAttribute("href", encodeURI(csvContent));
     link.setAttribute("download", "expenses.csv");
     document.body.appendChild(link);
     link.click();
@@ -179,36 +172,24 @@ function Home() {
     const doc = new jsPDF();
     doc.text("Trackwise Expense Report", 14, 16);
     const tableColumn = ["Category", "Amount", "Description", "Date"];
-    const tableRows = [];
-
-    entries.forEach(entry => {
-      const entryData = [
-        entry.category,
-        entry.amount,
-        entry.description,
-        new Date(entry.created_at).toLocaleDateString(),
-      ];
-      tableRows.push(entryData);
-    });
-
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 20,
-    });
+    const tableRows = entries.map(entry => [
+      entry.category,
+      entry.amount,
+      entry.description,
+      new Date(entry.created_at).toLocaleDateString(),
+    ]);
+    doc.autoTable({ head: [tableColumn], body: tableRows, startY: 20 });
     doc.save("expenses.pdf");
   };
 
   const handleImportCSV = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-
     const reader = new FileReader();
     reader.onload = async (e) => {
       const text = e.target.result;
       const lines = text.split("\n");
       const expenses = [];
-      // Skip header row
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
         if (line) {
@@ -223,7 +204,6 @@ function Home() {
           }
         }
       }
-
       if (expenses.length > 0) {
         try {
           await axios.post(`${import.meta.env.VITE_API_URL}/expenses/import`, { expenses }, {
@@ -240,7 +220,6 @@ function Home() {
     reader.readAsText(file);
   };
 
-  // Calculate budget progress
   const getCategoryTotal = (category) => {
     const monthStr = new Date().toISOString().slice(0, 7);
     return entries
@@ -249,93 +228,92 @@ function Home() {
   };
 
   return (
-    <div>
-      <main className="w-full flex-1 flex flex-col items-center px-4 py-8">
-        <div className="w-full max-w-6xl">
-          <h1 className="text-4xl font-bold text-gray-800 dark:text-white mb-6">Track Wise</h1>
+    <div className="w-screen min-h-screen px-2 md:px-4 lg:px-6 py-4">
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            {/* Budget Section */}
-            <div className="md:col-span-2 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold dark:text-white">Monthly Budgets</h2>
-                <AddBudgetModal onBudgetAdded={fetchBudgets} />
-              </div>
-              <div className="space-y-4">
-                {budgets.map(budget => (
-                  <BudgetCard
-                    key={budget.id}
-                    category={budget.category}
-                    amount={getCategoryTotal(budget.category)}
-                    budget={budget.amount}
-                  />
-                ))}
-                {budgets.length === 0 && <p className="text-gray-500">No budgets set for this month.</p>}
-              </div>
-            </div>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row items-start justify-between mb-6">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight text-foreground">Dashboard</h2>
+          <p className="text-muted-foreground">Overview of your financial health.</p>
+        </div>
 
-            {/* Actions Section */}
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 flex flex-col gap-4">
-              <h2 className="text-xl font-semibold dark:text-white mb-2">Actions</h2>
-              <Popover1 addEntry={addEntry} onClear={onClear} totalamt={totalamt} />
-              <Button onClick={handleCustomSavings} variant="secondary">Customised Saving Tips</Button>
-              <div className="flex gap-2">
-                <Button onClick={handleExportCSV} variant="outline" size="sm" className="flex-1">
-                  <FileText className="mr-2 h-4 w-4" /> CSV
-                </Button>
-                <Button onClick={handleExportPDF} variant="outline" size="sm" className="flex-1">
-                  <Download className="mr-2 h-4 w-4" /> PDF
-                </Button>
-              </div>
-              <div className="relative">
-                <input
-                  type="file"
-                  accept=".csv"
-                  onChange={handleImportCSV}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-                <Button variant="outline" className="w-full">
-                  <Upload className="mr-2 h-4 w-4" /> Import CSV
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center mb-6">
-            <DropdownMenuCheckboxes selectedMonth={selectedMonth} setSelectedMonth={setSelectedMonth} />
-          </div>
-
-          <div className="bg-white dark:bg-gray-800 w-full rounded-lg shadow p-6">
-            <Tables entries={sortedEntries} onDelete={onDelete} onSort={toggleSort} sortOrder={sortOrder} />
-
-            {showTipsBox && (isGenerating || savingsTips) && (
-              <div className="mt-6 p-4 border rounded-md bg-white dark:bg-gray-700 shadow relative max-w-4xl">
-                <h2 className="text-lg font-semibold mb-2 dark:text-white">💡 AI Savings Suggestions</h2>
-                <pre className="whitespace-pre-wrap text-gray-700 dark:text-gray-200 text-sm overflow-y-auto max-h-72">
-                  {savingsTips || "Generating..."}
-                </pre>
-                <button
-                  className="absolute top-2 right-2 text-sm bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                  onClick={() => navigator.clipboard.writeText(savingsTips)}
-                  disabled={!savingsTips}
-                >
-                  Copy
-                </button>
-                <button
-                  className="absolute top-2 right-20 text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                  onClick={() => setShowTipsBox(false)}
-                >
-                  Close
-                </button>
-              </div>
-            )}
-
-            <div className="absolute top-4 right-6 z-50 text-lg font-semibold bg-white dark:bg-gray-800 dark:text-white px-4 py-2 rounded shadow-md">
-              Total ({selectedMonth}): ₹{totalFilteredAmount}
-            </div>
+        <div className="flex items-center space-x-2 mt-2 md:mt-0">
+          <div className="bg-primary/10 text-primary px-4 py-2 rounded-md border border-primary/20 shadow-sm">
+            <span className="text-sm font-medium text-muted-foreground mr-2">
+              Total ({selectedMonth === 'thismonth' ? 'This Month' : selectedMonth}):
+            </span>
+            <span className="text-lg font-bold">₹{totalFilteredAmount.toLocaleString()}</span>
           </div>
         </div>
-      </main>
+      </div>
+
+      {/* GRID FULL WIDTH */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 w-full max-w-full">
+
+        {/* LEFT SIDE */}
+        <div className="col-span-4 space-y-4 w-full">
+          {/* Budgets Card */}
+          <Card className="shadow-sm w-full">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-lg font-semibold">Monthly Budgets</CardTitle>
+              <AddBudgetModal onBudgetAdded={fetchBudgets} />
+            </CardHeader>
+
+            <CardContent>
+              <div className="space-y-4">
+                {loading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                ) : budgets.length > 0 ? (
+                  budgets.map((budget) => (
+                    <BudgetCard
+                      key={budget.id}
+                      category={budget.category}
+                      amount={getCategoryTotal(budget.category)}
+                      budget={budget.amount}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-8 border-2 border-dashed rounded-lg text-muted-foreground">
+                    No budgets set for this month.
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Transactions */}
+          <Card className="shadow-sm w-full">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              <Popover1 addEntry={addEntry} onClear={onClear} totalamt={totalamt} />
+
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleExportCSV}
+              >
+                <Download className="mr-2 h-4 w-4" /> Export to CSV
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* RIGHT SIDE */}
+        <div className="col-span-3 space-y-4 w-full">
+          <Card className="shadow-sm w-full">{/* Quick Actions */}</Card>
+
+          {showTipsBox && (
+            <Card className="w-full bg-yellow-50 dark:bg-yellow-900/10 border-yellow-200 dark:border-yellow-900/50 animate-in slide-in-from-right-5">
+              {/* Tips Content */}
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
