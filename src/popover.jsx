@@ -30,14 +30,19 @@ function Popover1({ addEntry, onClear, totalamt }) {
     setFormData((prev) => ({ ...prev, [id]: value }));
   };
   const handleAdd = () => {
+    const formattedDate = formData.created_at.length === 7
+      ? `${formData.created_at}-01`
+      : formData.created_at;
+
     const newEntry = {
       title: formData.name,
-      created_at: formData.created_at,
+      created_at: formattedDate, // Use the fixed date here
       description: formData.desc,
       category: formData.category,
       amount: formData.amount,
     };
     addEntry(newEntry);
+    // totalamt(formData.amount);
     totalamt(formData.amount);
 
     setFormData({
