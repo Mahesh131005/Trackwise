@@ -44,7 +44,9 @@ router.post("/", async (req, res) => {
 
     // --- Budget Check Logic ---
     const expenseDate = new Date(created_at || Date.now());
-    const monthStr = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
+    const year = expenseDate.getUTCFullYear();
+    const month = String(expenseDate.getUTCMonth() + 1).padStart(2, '0');
+    const monthStr = `${year}-${month}`;
 
     const { data: budgetData } = await supabase
       .from('budgets')

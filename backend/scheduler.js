@@ -21,6 +21,7 @@ const processRecurringExpenses = async () => {
                 .insert([
                     {
                         user_id: item.user_id,
+                        title: `Recurring: ${item.category}`,
                         category: item.category,
                         amount: item.amount,
                         description: item.description || `Recurring: ${item.category}`,
@@ -62,7 +63,7 @@ const processRecurringExpenses = async () => {
 
 // Run every day at midnight
 const startScheduler = () => {
-    cron.schedule('0 0 * * *', processRecurringExpenses);
+    cron.schedule('* * * * *', processRecurringExpenses);
     console.log('⏰ Scheduler started: Checking recurring expenses daily at midnight.');
 };
 

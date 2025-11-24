@@ -8,6 +8,7 @@ import jsPDF from "jspdf";
 import Tables from "./tables";
 import "jspdf-autotable";
 import { Download } from "lucide-react";
+import { DropdownMenuCheckboxes } from "./components/dropd";
 import {
   Card,
   CardContent,
@@ -40,7 +41,9 @@ function Home() {
     return "unknown";
   };
 
+  // Updated filtering logic to include "all"
   const filteredEntries = entries.filter((entry) => {
+    if (selectedMonth === "all") return true;
     const label = getMonthLabel(entry.created_at);
     return label === selectedMonth;
   });
@@ -162,7 +165,19 @@ function Home() {
       )
       .reduce((sum, e) => sum + Number(e.amount), 0);
   };
-
+  const handleDeleteBudget = async (id) => {
+    if (!confirm("Are you sure you want to delete this budget?")) return;
+    try {
+      await axios.delete(`${import.meta.env.VITE_API_URL}/budgets/${id}`, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
+      // Refresh the list
+      fetchBudgets();
+    } catch (err) {
+      console.error("Failed to delete budget:", err);
+      alert("Failed to delete budget");
+    }
+  };
   return (
     <div className="w-screen min-h-screen px-2 md:px-4 lg:px-6 py-4">
 
@@ -180,7 +195,7 @@ function Home() {
         <div className="flex items-center space-x-2 mt-2 md:mt-0">
           <div className="bg-primary/10 text-primary px-4 py-2 rounded-md border border-primary/20 shadow-sm">
             <span className="text-sm font-medium text-muted-foreground mr-2">
-              Total ({selectedMonth === "thismonth" ? "This Month" : selectedMonth}):
+              Total ({selectedMonth === "all" ? "All Time" : selectedMonth === "thismonth" ? "This Month" : selectedMonth}):
             </span>
             <span className="text-lg font-bold">
               ₹{totalFilteredAmount.toLocaleString()}
@@ -212,9 +227,11 @@ function Home() {
                 budgets.map((budget) => (
                   <BudgetCard
                     key={budget.id}
+                    id={budget.id}
                     category={budget.category}
                     amount={getCategoryTotal(budget.category)}
                     budget={budget.amount}
+                    onDelete={handleDeleteBudget}
                   />
                 ))
               ) : (
@@ -237,17 +254,21 @@ function Home() {
           <CardContent className="flex flex-col gap-4">
             <Popover1 addEntry={addEntry} onClear={onClear} totalamt={totalamt} />
 
-            {/* Recent Transactions */}
+            {/* Recent Transactions with Dropdown */}
             <Card className="shadow-sm w-full">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg font-semibold">
                   Recent Transactions
                 </CardTitle>
+                <DropdownMenuCheckboxes
+                  selectedMonth={selectedMonth}
+                  setSelectedMonth={setSelectedMonth}
+                />
               </CardHeader>
 
               <CardContent>
                 <Tables
-                  entries={filteredEntries}
+                  entries={sortedEntries}
                   onDelete={onDelete}
                   onSort={toggleSort}
                   sortOrder={sortOrder}

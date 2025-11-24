@@ -13,6 +13,7 @@ import {
 export function DropdownMenuCheckboxes({ selectedMonth, setSelectedMonth }) {
 
   const labelMap = {
+    all: "All Months",
     older: "Older",
     lastmonth: "Last Month",
     thismonth: "This Month"
@@ -21,8 +22,8 @@ export function DropdownMenuCheckboxes({ selectedMonth, setSelectedMonth }) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="">
-          {labelMap[selectedMonth]}
+        <Button variant="outline" className="ml-auto">
+          {labelMap[selectedMonth] || "Select Period"}
         </Button>
       </DropdownMenuTrigger>
 
@@ -34,9 +35,10 @@ export function DropdownMenuCheckboxes({ selectedMonth, setSelectedMonth }) {
           value={selectedMonth}
           onValueChange={setSelectedMonth}
         >
-          <DropdownMenuRadioItem value="older">Older</DropdownMenuRadioItem>
-          <DropdownMenuRadioItem value="lastmonth">Last Month</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="all">All Months</DropdownMenuRadioItem>
           <DropdownMenuRadioItem value="thismonth">This Month</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="lastmonth">Last Month</DropdownMenuRadioItem>
+          <DropdownMenuRadioItem value="older">Older</DropdownMenuRadioItem>
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>
     </DropdownMenu>

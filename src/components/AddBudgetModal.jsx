@@ -24,7 +24,7 @@ export function AddBudgetModal({ onBudgetAdded }) {
             const month = new Date().toISOString().slice(0, 7); // YYYY-MM
             await axios.post(
                 `${import.meta.env.VITE_API_URL}/budgets`,
-                { category, amount, month },
+                { category: category.trim(), amount, month },
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("token")}`,

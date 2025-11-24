@@ -29,6 +29,22 @@ router.get("/", async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+// Delete a budget
+router.delete("/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { error } = await supabase
+            .from("budgets")
+            .delete()
+            .eq("id", id)
+            .eq("user_id", req.user.userId);
+
+        if (error) throw error;
+        res.json({ message: "Budget deleted" });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Set or Update a budget
 router.post("/", async (req, res) => {
