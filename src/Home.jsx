@@ -108,7 +108,9 @@ function Home() {
 
   // --- Handlers ---
   const addEntry = async (entry) => {
+    console.log("Current API URL:", import.meta.env.VITE_API_URL); // Add this line
     try {
+      console.log("Adding expense:", entry);
       await axios.post(`${import.meta.env.VITE_API_URL}/expenses`, entry, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });

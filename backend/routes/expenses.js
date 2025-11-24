@@ -25,13 +25,14 @@ router.get("/", async (req, res) => {
 // Add a new expense
 router.post("/", async (req, res) => {
   try {
-    const { category, amount, description, created_at } = req.body;
-
-    // Insert expense
+    // 1. Add 'title' to this line
+    const { title, category, amount, description, created_at } = req.body;
+    console.log("Received expense data:", req.body);
     const { data, error } = await supabase
       .from("expenses")
       .insert([{
-        user_id: req.user.userId, // Uses ID from the custom token
+        user_id: req.user.userId,
+        title, // 2. Add 'title' to the insert object
         category,
         amount,
         description,
