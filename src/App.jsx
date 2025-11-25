@@ -27,6 +27,7 @@ function App() {
                     <Home />
                   </PrivateRoute>
                 } />
+
                 <Route path="/reports" element={
                   <PrivateRoute>
                     <Reports />

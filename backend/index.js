@@ -1,7 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-
+//
+const geminiRoute = require("./routes/gemini.js");
+//
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -15,6 +17,7 @@ app.use("/auth", require("./routes/auth"));
 app.use("/expenses", require("./routes/expenses"));
 app.use("/budgets", require("./routes/budgets"));
 app.use("/recurring", require("./routes/recurring"));
+app.use("/ai", geminiRoute);
 
 const { startScheduler } = require("./scheduler");
 startScheduler();
