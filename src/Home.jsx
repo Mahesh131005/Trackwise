@@ -8,6 +8,8 @@ import jsPDF from "jspdf";
 import Tables from "./tables";
 import "jspdf-autotable";
 import { Download } from "lucide-react";
+// Use dropd or dropdr based on which file you actually want to use. 
+// Based on your file list, both exist. I will use dropd as per your previous code.
 import { DropdownMenuCheckboxes } from "./components/dropd";
 import {
   Card,
@@ -41,8 +43,11 @@ function Home() {
     return "unknown";
   };
 
-  // Updated filtering logic to include "all"
-  const filteredEntries = entries.filter((entry) => {
+  // Updated filtering logic to include "all" with SAFETY CHECK
+  // This prevents the "entries.filter is not a function" error
+  const safeEntries = Array.isArray(entries) ? entries : [];
+
+  const filteredEntries = safeEntries.filter((entry) => {
     if (selectedMonth === "all") return true;
     const label = getMonthLabel(entry.created_at);
     return label === selectedMonth;
@@ -73,9 +78,11 @@ function Home() {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/expenses`, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      setEntries(res.data);
+      // Ensure response data is an array
+      setEntries(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error fetching expenses:", err);
+      setEntries([]); // Fallback to empty array
     } finally {
       setLoading(false);
     }
@@ -90,9 +97,10 @@ function Home() {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         }
       );
-      setBudgets(res.data);
+      setBudgets(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error fetching budgets:", err);
+      setBudgets([]);
     }
   };
 
@@ -106,7 +114,8 @@ function Home() {
       await axios.post(`${import.meta.env.VITE_API_URL}/expenses`, entry, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
       });
-      setEntries((prev) => [...prev, entry]);
+      // Use functional update to ensure prev is handled safely
+      setEntries((prev) => [...(Array.isArray(prev) ? prev : []), entry]);
       totalamt(entry.amount);
       fetchExpenses();
     } catch (err) {
@@ -141,7 +150,7 @@ function Home() {
   const handleExportCSV = () => {
     const csvContent =
       "data:text/csv;charset=utf-8,Category,Amount,Description,Date\n" +
-      entries
+      safeEntries
         .map(
           (e) =>
             `${e.category},${e.amount},${e.description},${e.created_at}`
@@ -157,10 +166,12 @@ function Home() {
 
   const getCategoryTotal = (category) => {
     const monthStr = new Date().toISOString().slice(0, 7);
-    return entries
+    const clean = (str) => str?.trim().toLowerCase() || "";
+
+    return safeEntries
       .filter(
         (e) =>
-          e.category === category &&
+          clean(e.category) === clean(category) &&
           e.created_at.startsWith(monthStr)
       )
       .reduce((sum, e) => sum + Number(e.amount), 0);

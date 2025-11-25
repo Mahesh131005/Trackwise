@@ -18,11 +18,13 @@ import {
   Legend,
 } from "recharts";
 import domtoimage from 'dom-to-image';
+
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff6f61", "#00c49f", "#ffbb28", "#4635B1"];
 
 function Reports() {
   const reportRef = useRef();
   const [expenses, setExpenses] = useState([]);
+  const [budgets, setBudgets] = useState([]); // 🟢 Added state for budgets
   const [monthlydata, setMonthlydata] = useState([]);
   const [catdata, setCatdata] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState("thismonth");
@@ -30,52 +32,61 @@ function Reports() {
   const [isGenerating, setIsGenerating] = useState(true);
   const [progress, setProgress] = useState(0);
 
+  const downloadPDF = async () => {
+    const node = reportRef.current;
+    if (!node) return;
 
+    try {
+      const dataUrl = await domtoimage.toPng(node);
+      const pdf = new jsPDF("p", "mm", "a4");
 
-const downloadPDF = async () => {
-  const node = reportRef.current;
-  if (!node) return;
+      const img = new Image();
+      img.src = dataUrl;
+      img.onload = () => {
+        const imgProps = pdf.getImageProperties(img);
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = (imgProps.height * pageWidth) / imgProps.width;
 
-  try {
-    const dataUrl = await domtoimage.toPng(node);
-    const pdf = new jsPDF("p", "mm", "a4");
+        pdf.addImage(img, "PNG", 0, 0, pageWidth, pageHeight);
+        pdf.save("Expense_Report.pdf");
+      };
+    } catch (err) {
+      console.error("PDF generation failed:", err);
+      alert("❌ PDF generation failed.");
+    }
+  };
 
-    const img = new Image();
-    img.src = dataUrl;
-    img.onload = () => {
-      const imgProps = pdf.getImageProperties(img);
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = (imgProps.height * pageWidth) / imgProps.width;
-
-      pdf.addImage(img, "PNG", 0, 0, pageWidth, pageHeight);
-      pdf.save("Expense_Report.pdf");
-    };
-  } catch (err) {
-    console.error("PDF generation failed:", err);
-    alert("❌ PDF generation failed.");
-  }
-};
-
-
+  // 🟢 Updated: Fetch BOTH Expenses and Budgets
   useEffect(() => {
-    const fetchExpenses = async () => {
+    const fetchData = async () => {
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/expenses`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        });
-        setExpenses(res.data);
+        const token = localStorage.getItem("token");
+        const headers = { Authorization: `Bearer ${token}` };
+        const month = new Date().toISOString().slice(0, 7); // Current month YYYY-MM
+
+        // Run both fetches in parallel
+        const [expRes, budgetRes] = await Promise.all([
+          axios.get(`${import.meta.env.VITE_API_URL}/expenses`, { headers }),
+          axios.get(`${import.meta.env.VITE_API_URL}/budgets?month=${month}`, { headers })
+        ]);
+
+        setExpenses(expRes.data);
+        setBudgets(budgetRes.data); // Store budgets
+
       } catch (err) {
-        console.error("Failed to fetch expenses:", err);
+        console.error("Failed to fetch data:", err);
       }
     };
-    fetchExpenses();
+    fetchData();
   }, []);
 
+  // Process Chart Data
   useEffect(() => {
     const now = new Date();
     const currentMonth = now.getMonth();
     const currentYear = now.getFullYear();
     const grouped = { thismonth: [], lastmonth: [], older: [] };
+
     expenses.forEach((exp) => {
       const date = new Date(exp.created_at);
       const month = date.getMonth();
@@ -84,19 +95,28 @@ const downloadPDF = async () => {
       else if ((month === currentMonth - 1 && year === currentYear) || (currentMonth === 0 && month === 11 && year === currentYear - 1)) grouped.lastmonth.push(exp);
       else grouped.older.push(exp);
     });
+
     setMonthlydata([
       { month: "This Month", expense: grouped.thismonth.reduce((a, b) => a + Number(b.amount), 0) },
       { month: "Last Month", expense: grouped.lastmonth.reduce((a, b) => a + Number(b.amount), 0) },
       { month: "Older", expense: grouped.older.reduce((a, b) => a + Number(b.amount), 0) },
     ]);
+
     const map = {};
-    grouped[selectedMonth]?.forEach((e) => {
-      map[e.category] = (map[e.category] || 0) + Number(e.amount);
+    // Use 'all' logic or fallback to selected month
+    const entriesToChart = selectedMonth === 'all' ? expenses : grouped[selectedMonth];
+
+    entriesToChart?.forEach((e) => {
+      // Clean category name to match better
+      const cat = e.category.trim();
+      map[cat] = (map[cat] || 0) + Number(e.amount);
     });
+
     const pieData = Object.entries(map).map(([category, value]) => ({ category, value }));
     setCatdata(pieData);
   }, [expenses, selectedMonth]);
 
+  // Fake Progress Bar
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((old) => (old >= 100 ? 100 : old + 15));
@@ -104,16 +124,27 @@ const downloadPDF = async () => {
     return () => clearInterval(interval);
   }, []);
 
+  // 🟢 Generate AI Tips (Updated with Budgets)
   useEffect(() => {
     const generateTips = async () => {
       if (expenses.length === 0) return;
+
       setIsGenerating(true);
-      const tips = await getSavingsTipsFromGemini(expenses);
+
+      // Filter current month expenses for the AI
+      const currentMonthStr = new Date().toISOString().slice(0, 7);
+      const currentMonthExpenses = expenses.filter(e => e.created_at.startsWith(currentMonthStr));
+
+      // Pass all 3 arguments: expenses, budgets, currentMonthExpenses
+      const tips = await getSavingsTipsFromGemini(expenses, budgets, currentMonthExpenses);
+
       setSavingsTips(tips);
       setIsGenerating(false);
     };
+
+    // Wait for budgets to load if possible, or just run if expenses exist
     generateTips();
-  }, [expenses]);
+  }, [expenses, budgets]); // Re-run when budgets load
 
   if (progress < 100) {
     return (

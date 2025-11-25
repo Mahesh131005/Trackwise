@@ -1,19 +1,32 @@
-export async function getSavingsTipsFromGemini(allEntries) {
-  const API_KEY = "AIzaSyBxM22f5BjVB-hVV5ZMRlp8bOU9ub2RAcw"; 
+export async function getSavingsTipsFromGemini(expenses, budgets = [], currentMonthExpenses = []) {
+  // 1. Retrieve Key securely
+  const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
 
+  if (!API_KEY) {
+    console.error("❌ Missing API Key: Make sure VITE_GEMINI_API_KEY is in your .env file");
+    return "Error: Missing Gemini API Key.";
+  }
+
+  // 2. Construct the prompt
   const prompt = `
-You are a smart financial assistant. Analyze this user's expense data (array of entries), and give suggestions on topics given below ,make it short and effective
-just deliver clean text and not any json objects,,it should be clear to use:
-1. Savings suggestions: where to reduce, how to optimize for each entry.
-2. Highlight categories with overspending.
+You are a smart financial assistant. Analyze this user's financial data and give customized savings tips.
+Make it short, effective, and clean text (no JSON).
 
 Data:
-${JSON.stringify(allEntries, null, 2)}
+1. All Expenses: ${JSON.stringify(expenses, null, 2)}
+2. Monthly Budgets: ${JSON.stringify(budgets, null, 2)}
+3. Current Month Expenses: ${JSON.stringify(currentMonthExpenses, null, 2)}
+
+Instructions:
+1. Compare current month spending against budgets. Highlight any overspending.
+2. Analyze spending patterns from all expenses.
+3. Provide specific, actionable savings suggestions based on this data.
   `;
 
   try {
+    // 3. Use the CORRECT Model: gemini-1.5-flash
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`,
       {
         method: "POST",
         headers: {
@@ -34,8 +47,10 @@ ${JSON.stringify(allEntries, null, 2)}
     );
 
     if (!res.ok) {
-      console.error("Failed to fetch from Gemini:", res.statusText);
-      return "Gemini API error: " + res.status;
+      console.error(`❌ Gemini API Error: ${res.status} ${res.statusText}`);
+      const errorData = await res.json();
+      console.error("Details:", errorData);
+      return `Gemini API error: ${res.status} (${errorData.error?.message || "Unknown"})`;
     }
 
     const data = await res.json();
@@ -43,7 +58,7 @@ ${JSON.stringify(allEntries, null, 2)}
     return text;
 
   } catch (error) {
-    console.error("Gemini API call failed:", error);
+    console.error("❌ Gemini API Call Failed:", error);
     return "Gemini error: " + error.message;
   }
 }

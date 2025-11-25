@@ -63,7 +63,7 @@ const processRecurringExpenses = async () => {
 
 // Run every day at midnight
 const startScheduler = () => {
-    cron.schedule('* * * * *', processRecurringExpenses);
+    cron.schedule('0 0 * * *', processRecurringExpenses);
     console.log('⏰ Scheduler started: Checking recurring expenses daily at midnight.');
 };
 
