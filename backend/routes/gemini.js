@@ -9,7 +9,7 @@ router.post("/savings", async (req, res) => {
     try {
         const { expenses, budgets, currentMonthExpenses } = req.body;
 
-        const defaultModel = process.env.DEFAULT_MODEL || "gemini-flash-latest";
+        const defaultModel = process.env.DEFAULT_MODEL || "gemini-1.5-flash";
         const model = genAI.getGenerativeModel({ model: defaultModel });
 
         const prompt = `

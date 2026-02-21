@@ -70,18 +70,19 @@ router.post("/google-login", async (req, res) => {
       .single();
 
     // Step 2: If not found, create new user
-   
+
     if (error || !user) {
-       console.log("Creating user:", email);
+      console.log("Creating user:", email);
       const { data: newUser, error: insertErr } = await supabase
         .from("users")
-        .insert([{ email,password: ""  }])
+        .insert([{ email, password: "" }])
+        .select()
         .single();
 
       if (insertErr) {
-  console.error("❌ Supabase insert error:", insertErr);
-  return res.status(500).json({ message: "Failed to create user" });
-}
+        console.error("❌ Supabase insert error:", insertErr);
+        return res.status(500).json({ message: "Failed to create user" });
+      }
 
       user = newUser;
     }
