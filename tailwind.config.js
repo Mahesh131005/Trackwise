@@ -4,7 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}"
   ],
-  darkMode: false, // ✅ fully disables dark mode + oklch usage
+  darkMode: 'class',
   theme: {
     extend: {}
   },

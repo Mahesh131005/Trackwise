@@ -115,6 +115,8 @@ function Reports() {
     setCatdata(pieData);
   }, [expenses, selectedMonth]);
 
+  const totalExpenses = expenses.reduce((s, e) => s + Number(e.amount || 0), 0);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress((old) => (old >= 100 ? 100 : old + 15));
@@ -148,7 +150,7 @@ function Reports() {
   if (progress < 100) {
     return (
       <div className="p-4 w-full">
-        <h2 className="text-xl font-semibold mb-4">Generating Report...</h2>
+        <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-white">Generating Report...</h2>
         <Progress value={progress} className="w-full h-4" />
       </div>
     );
@@ -156,95 +158,110 @@ function Reports() {
 
   return (
     <>
-      <div className="flex justify-end px-4 mb-4">
-        <button
-          onClick={downloadPDF}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors shadow-sm"
-        >
-          📥 Download Report as PDF
-        </button>
+      <div className="w-full">
+        <div className="flex justify-end px-6 md:px-8 lg:px-10 py-4">
+          <button
+            onClick={downloadPDF}
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors shadow-md"
+          >
+            📥 Download Report as PDF
+          </button>
+        </div>
       </div>
+      <div className="w-full px-6 md:px-8 lg:px-10 py-8" ref={reportRef}>
+        <div className="w-full space-y-12">
+          <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Expense Reports</h2>
+          {/* 🟢 ROW 1: Wide Responsive Grid (3 columns on large screens) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
 
-      <div className="p-4 space-y-8" ref={reportRef}>
-
-        <h2 className="text-3xl font-bold text-gray-800">Expense Reports</h2>
-
-        {/* 🟢 ROW 1: Charts Side by Side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-          {/* Bar Chart Container */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 flex flex-col h-[400px]">
-            <h3 className="text-xl font-semibold mb-4 text-gray-700">Monthly Expense Trend</h3>
-            <div className="flex-1 w-full min-h-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlydata} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="month" />
-                  <YAxis
-                    width={50}
-                    tickFormatter={formatCompactNumber}
-                    tick={{ fontSize: 12 }}
-                  />
-                  <Tooltip formatter={(value) => formatCompactNumber(value)} cursor={{ fill: 'transparent' }} />
-                  <Legend />
-                  {/* minPointSize={5} ensures small bars are seen even against huge "Older" data */}
-                  <Bar dataKey="expense" fill="#8884d8" name="Expense" radius={[4, 4, 0, 0]} minPointSize={5} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-
-          {/* Pie Chart Container */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 flex flex-col h-[400px]">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-gray-700">Category Distribution</h3>
-              <DropdownMenuCheckboxes
-                selectedMonth={selectedMonth}
-                setSelectedMonth={setSelectedMonth}
-              />
-            </div>
-            <div className="flex-1 w-full min-h-0">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={catdata}
-                    dataKey="value"
-                    nameKey="category"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                  >
-                    {catdata.map((_, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => formatCompactNumber(value)} />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-
-        {/* 🟢 ROW 2: Savings Tips (Full Width) */}
-        <div className="w-full bg-white p-6 rounded-xl shadow-md border border-gray-100">
-          <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-            💡 Customised Savings Tips
-          </h3>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            {isGenerating ? (
-              <div className="flex items-center gap-2 text-gray-600">
-                <span className="animate-pulse">Analyzing your spending habits...</span>
+            {/* Monthly Chart: spans 2 columns on lg for extra width */}
+            <div className="md:col-span-2 lg:col-span-2 bg-[#ffffff] dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700 flex flex-col min-h-[360px] lg:min-h-[480px] transform transition-transform duration-300 hover:-translate-y-2 animate-fadeIn">
+              <h3 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">Monthly Expense Trend</h3>
+              <div className="flex-1 w-full min-h-0">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={monthlydata} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="month" />
+                    <YAxis
+                      width={60}
+                      tickFormatter={formatCompactNumber}
+                      tick={{ fontSize: 12 }}
+                    />
+                    <Tooltip formatter={(value) => formatCompactNumber(value)} cursor={{ fill: 'transparent' }} />
+                    <Legend />
+                    <Bar dataKey="expense" fill="#6b46c1" name="Expense" radius={[10, 10, 0, 0]} minPointSize={6} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            ) : (
-              <pre className="whitespace-pre-wrap text-gray-700 text-sm font-sans leading-relaxed">
-                {savingsTips}
-              </pre>
-            )}
+            </div>
+
+            {/* Right column: Pie chart + Summary stacked */}
+            <div className="flex flex-col gap-8">
+              <div className="bg-[#ffffff] dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700 flex flex-col h-[340px] transform transition-transform duration-300 hover:-translate-y-2 animate-fadeIn">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-2xl font-semibold text-gray-800 dark:text-white">Category Distribution</h3>
+                  <DropdownMenuCheckboxes
+                    selectedMonth={selectedMonth}
+                    setSelectedMonth={setSelectedMonth}
+                  />
+                </div>
+                <div className="flex-1 w-full min-h-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={catdata}
+                        dataKey="value"
+                        nameKey="category"
+                        cx="50%"
+                        cy="50%"
+                        outerRadius={100}
+                        labelLine={false}
+                      >
+                        {catdata.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Pie>
+                      <Tooltip formatter={(value) => formatCompactNumber(value)} />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Summary card */}
+              <div className="bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700 flex flex-col justify-center h-[180px] animate-slideUp">
+                <h4 className="text-lg font-medium text-gray-700 dark:text-white mb-2">Overview</h4>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-3xl font-bold text-gray-900 dark:text-white">₹{formatCompactNumber(totalExpenses)}</div>
+                    <div className="text-sm text-gray-500 dark:text-slate-300">Total tracked</div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xl font-medium text-indigo-600 dark:text-indigo-400">{monthlydata[0]?.expense ? `₹${formatCompactNumber(monthlydata[0].expense)}` : '₹0'}</div>
+                    <div className="text-sm text-gray-500 dark:text-slate-300">This month</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 🟢 ROW 2: Savings Tips (Full Width) */}
+          <div className="w-full bg-[#ffffff] dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-gray-100 dark:border-slate-700 transform transition-transform duration-300 hover:-translate-y-1 animate-slideUp">
+            <h3 className="text-2xl font-semibold mb-4 flex items-center gap-2 dark:text-white">
+              💡 Customised Savings Tips
+            </h3>
+            <div className="bg-gray-50 dark:bg-slate-900 p-4 rounded-lg">
+              {isGenerating ? (
+                <div className="flex items-center gap-2 text-gray-600 dark:text-slate-300">
+                  <span className="animate-pulse">Analyzing your spending habits...</span>
+                </div>
+              ) : (
+                <pre className="whitespace-pre-wrap text-gray-700 dark:text-slate-200 text-sm font-sans leading-relaxed">
+                  {savingsTips}
+                </pre>
+              )}
+            </div>
           </div>
         </div>
-
       </div>
     </>
   );

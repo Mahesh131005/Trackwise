@@ -26,21 +26,39 @@ function Signup() {
   };
 
   return (
-    <Card className="w-full min-w-2xl mt-4">
-      <form onSubmit={handleSignup}>
-        <CardHeader>
-          <CardTitle>Create Account</CardTitle>
-          <CardDescription>Enter your email and password to sign up</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <Input placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-          <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </CardContent>
-        <CardFooter>
-          <Button type="submit" className="w-full">Sign Up</Button>
-        </CardFooter>
-      </form>
-    </Card>
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-100 dark:bg-slate-900">
+      <Card className="w-full max-w-md p-4 z-10 dark:bg-slate-800 dark:border-gray-700">
+        <form onSubmit={handleSignup}>
+          <CardHeader>
+            <CardTitle className="text-2xl dark:text-white">Create Account</CardTitle>
+            <CardDescription className="text-sm dark:text-slate-300">Enter your email and password to sign up</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6">
+            <Input 
+              placeholder="Email" 
+              value={email} 
+              onChange={(e) => setEmail(e.target.value)}
+              className="dark:bg-slate-700 dark:border-gray-600 dark:text-white"
+              required
+            />
+            <Input 
+              type="password" 
+              placeholder="Password" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              className="dark:bg-slate-700 dark:border-gray-600 dark:text-white"
+              required
+            />
+          </CardContent>
+          <CardFooter className="flex flex-col gap-3">
+            <Button type="submit" className="w-full">Sign Up</Button>
+            <p className="text-sm text-center text-gray-600 dark:text-slate-400">
+              Already have an account? <a href="/login" className="text-blue-600 dark:text-blue-400 font-medium hover:underline">Login</a>
+            </p>
+          </CardFooter>
+        </form>
+      </Card>
+    </div>
   );
 }
 

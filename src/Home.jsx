@@ -190,25 +190,25 @@ function Home() {
     }
   };
   return (
-    <div className="w-screen min-h-screen px-2 md:px-4 lg:px-6 py-4">
+    <div className="w-full min-h-screen px-6 md:px-8 lg:px-10 py-8 bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-200">
 
       {/* HEADER */}
       <div className="flex flex-col md:flex-row items-start justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-foreground">
+          <h2 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
             Dashboard
           </h2>
-          <p className="text-muted-foreground">
+          <p className="text-slate-700 dark:text-slate-200">
             Overview of your financial health.
           </p>
         </div>
 
         <div className="flex items-center space-x-2 mt-2 md:mt-0">
-          <div className="bg-primary/10 text-primary px-4 py-2 rounded-md border border-primary/20 shadow-sm">
-            <span className="text-sm font-medium text-muted-foreground mr-2">
+            <div className="bg-primary/10 dark:bg-primary/20 text-primary dark:text-indigo-300 px-4 py-2 rounded-md border border-primary/20 dark:border-primary/40 shadow-sm">
+            <span className="text-sm font-medium text-slate-700 dark:text-slate-200 mr-2">
               Total ({selectedMonth === "all" ? "All Time" : selectedMonth === "thismonth" ? "This Month" : selectedMonth}):
             </span>
-            <span className="text-lg font-bold">
+            <span className="text-lg font-bold dark:text-white">
               ₹{totalFilteredAmount.toLocaleString()}
             </span>
           </div>
@@ -219,9 +219,9 @@ function Home() {
       <div className="grid grid-cols-1 gap-6 w-full">
 
         {/* Monthly Budgets */}
-        <Card className="shadow-sm w-full">
+        <Card className="shadow-sm w-full dark:bg-slate-800 dark:border-gray-700">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-lg font-semibold">
+            <CardTitle className="text-lg font-semibold dark:text-white">
               Monthly Budgets
             </CardTitle>
             <AddBudgetModal onBudgetAdded={fetchBudgets} />
@@ -246,7 +246,7 @@ function Home() {
                   />
                 ))
               ) : (
-                <div className="text-center py-8 border-2 border-dashed rounded-lg text-muted-foreground">
+                <div className="text-center py-8 border-2 border-dashed rounded-lg text-slate-600 dark:text-slate-300">
                   No budgets set for this month.
                 </div>
               )}
@@ -255,9 +255,9 @@ function Home() {
         </Card>
 
         {/* Quick Actions + Recent Transactions */}
-        <Card className="shadow-sm w-full">
+        <Card className="shadow-sm w-full dark:bg-slate-800 dark:border-gray-700">
           <CardHeader>
-            <CardTitle className="text-lg font-semibold">
+            <CardTitle className="text-lg font-semibold dark:text-white">
               Quick Actions
             </CardTitle>
           </CardHeader>
@@ -266,9 +266,9 @@ function Home() {
             <Popover1 addEntry={addEntry} onClear={onClear} totalamt={totalamt} />
 
             {/* Recent Transactions with Dropdown */}
-            <Card className="shadow-sm w-full">
+            <Card className="shadow-sm w-full dark:bg-slate-800 dark:border-gray-700">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-lg font-semibold">
+                <CardTitle className="text-lg font-semibold dark:text-white">
                   Recent Transactions
                 </CardTitle>
                 <DropdownMenuCheckboxes

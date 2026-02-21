@@ -74,12 +74,12 @@ export function RecurringExpenses() {
     };
 
     return (
-        <div className="w-full flex flex-col items-center px-4 py-8">
-            <div className="w-full max-w-6xl space-y-6">
+        <div className="w-full min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-200">
+            <div className="w-full h-full px-6 md:px-8 lg:px-10 py-8 space-y-8">
                 <h1 className="text-3xl font-bold text-foreground">Recurring Expenses</h1>
 
                 {/* Add New Section */}
-                <Card className="shadow-md">
+                <Card className="shadow-md w-full">
                     <CardHeader>
                         <CardTitle className="text-xl font-semibold flex items-center gap-2">
                             <Plus className="h-5 w-5 text-primary" /> Add New Subscription
@@ -145,7 +145,7 @@ export function RecurringExpenses() {
                 </Card>
 
                 {/* List Section */}
-                <Card className="shadow-md">
+                <Card className="shadow-md w-full">
                     <CardHeader>
                         <CardTitle className="text-xl font-semibold flex items-center gap-2">
                             <Calendar className="h-5 w-5 text-primary" /> Active Subscriptions

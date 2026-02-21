@@ -9,7 +9,8 @@ router.post("/savings", async (req, res) => {
     try {
         const { expenses, budgets, currentMonthExpenses } = req.body;
 
-        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+        const defaultModel = process.env.DEFAULT_MODEL || "gemini-flash-latest";
+        const model = genAI.getGenerativeModel({ model: defaultModel });
 
         const prompt = `
 You are a financial assistant.

@@ -19,6 +19,11 @@ function Login() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
 
+  // Only render Google sign-in when origin is explicitly allowed via env.
+  // Set VITE_GOOGLE_ALLOWED_ORIGINS= http://localhost:5173,https://your-deploy.example
+  const allowedOrigins = (import.meta.env.VITE_GOOGLE_ALLOWED_ORIGINS || "").split(",").map(s => s.trim()).filter(Boolean);
+  const canShowGoogle = typeof window !== 'undefined' && allowedOrigins.includes(window.location.origin);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -58,16 +63,16 @@ function Login() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <Card className="w-full max-w-md p-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-100 dark:bg-slate-900">
+      <Card className="w-full max-w-md p-4 z-10 dark:bg-slate-800 dark:border-gray-700">
         <form onSubmit={handleLogin}>
           <CardHeader>
-            <CardTitle>Login to your account</CardTitle>
-            <CardDescription>
+            <CardTitle className="dark:text-white">Login to your account</CardTitle>
+            <CardDescription className="dark:text-slate-300">
               Enter your email below to login to your account
             </CardDescription>
             <CardAction>
-              <Button variant="link" className="text-blue-600 underline" onClick={handleSignup}>
+              <Button variant="link" className="text-blue-600 dark:text-blue-400 underline" onClick={handleSignup}>
                 Sign Up
               </Button>
             </CardAction>
@@ -76,20 +81,21 @@ function Login() {
           <CardContent>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="dark:text-white">Email</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   placeholder="you@example.com"
                   onChange={(e) => setEmail(e.target.value)}
+                  className="dark:bg-slate-700 dark:border-gray-600 dark:text-white"
                   required
                 />
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password">Password</Label>
-                  <a href="#" className="text-sm underline text-blue-500 hover:text-blue-700">
+                  <Label htmlFor="password" className="dark:text-white">Password</Label>
+                  <a href="#" className="text-sm underline text-blue-500 hover:text-blue-700 dark:text-blue-400">
                     Forgot password?
                   </a>
                 </div>
@@ -98,6 +104,7 @@ function Login() {
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="dark:bg-slate-700 dark:border-gray-600 dark:text-white"
                   required
                 />
               </div>
@@ -108,12 +115,19 @@ function Login() {
             <Button type="submit" className="w-full">
               Login
             </Button>
-  <GoogleLogin
-    onSuccess={credentialResponse => handleGoogleSuccess(credentialResponse)}
-    onError={() => console.log("Login Failed")}
-    shape="pill"
-    theme="filled_black"
-  />
+            {canShowGoogle ? (
+              <GoogleLogin
+                onSuccess={credentialResponse => handleGoogleSuccess(credentialResponse)}
+                onError={() => console.log("Login Failed")}
+                shape="pill"
+                theme="filled_black"
+              />
+            ) : (
+              <div className="text-xs text-muted-foreground text-center mt-2">
+                Google Sign-In disabled for this origin. To enable, add <strong>{window.location.origin}</strong> to
+                <span className="font-medium"> VITE_GOOGLE_ALLOWED_ORIGINS</span> or configure your OAuth client.
+              </div>
+            )}
 
           </CardFooter>
         </form>
